@@ -15,6 +15,7 @@ object gender {
 
     import  spark.implicits._
 
+//    读数据
     def catalog =
       """{
          |"table":{"namespace":"default","name":"tbl_users"},
@@ -24,21 +25,21 @@ object gender {
          |"gender":{"cf":"cf","col":"gender","type":"string"}
          |}}
        """.stripMargin
-
     val readDF = spark.read
       .option(HBaseTableCatalog.tableCatalog, catalog)
       .format("org.apache.spark.sql.execution.datasources.hbase")
       .load()
 
+//  数据处理
     val resDF= readDF.select('id,
       when('gender === "1","男").
         when('gender === "2","女").
         otherwise("未知").
         as("gender"))
-
 //    println(readDF.count())
 //    resDF.show()
 
+//    写数据
     val catalogwrite =
       """
         |{
@@ -49,7 +50,6 @@ object gender {
         |"gender":{"cf":"cf","col":"gender","type":"string"}
         |}}
       """.stripMargin
-
     resDF.write
         .option(HBaseTableCatalog.tableCatalog, catalogwrite)
         .option(HBaseTableCatalog.newTable,"5")
