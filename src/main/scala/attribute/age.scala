@@ -8,7 +8,7 @@ object age {
 
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
-      .appName("gender")
+      .appName("age")
       .master("local")
       .getOrCreate()
 

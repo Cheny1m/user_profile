@@ -14,7 +14,7 @@ import org.apache.spark.sql.execution.datasources.hbase.HBaseTableCatalog
 object nativePlace {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
-      .appName("gender")
+      .appName("nativePlace")
       .master("local")
       .getOrCreate()
 

@@ -4,23 +4,23 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.execution.datasources.hbase.HBaseTableCatalog
 import org.apache.spark.sql.functions._
 
-object politicalFace {
+object job {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
-      .appName("politicalFace")
+      .appName("job")
       .master("local")
       .getOrCreate()
 
     import  spark.implicits._
 
-//    读数据
+//    写数据
     def catalog =
       """{
         |"table":{"namespace":"default","name":"tbl_users"},
         |"rowkey":"id",
         |"columns":{
         |"id":{"cf":"rowkey","col":"id","type":"string"},
-        |"politicalFace":{"cf":"cf","col":"politicalFace","type":"string"}
+        |"job":{"cf":"cf","col":"job","type":"string"}
         |}}
       """.stripMargin
     val readDF = spark.read
@@ -30,14 +30,16 @@ object politicalFace {
 //    readDF.show()
 
 //    数据处理
-    val resDF = readDF.select('id,
-        when('politicalFace === "1","群众").
-        when('politicalFace === "2","党员").
-        when('politicalFace === "3","无党派人士").
-        otherwise("其他").
-        as("politicalFace"))
-//    resDF.show()
-
+    val resultDF = readDF.select('id,
+      when('job === "1","学生")
+        .when('job === "2","公务员")
+        .when('job === "3", "军人")
+        .when('job === "4","警察")
+        .when('job === "5","教师")
+        .when('job === "6","白领")
+        .otherwise("未知")
+        .as("job"))
+//    resultDF.show()
 
 //    写数据
     def catalogwrite =
@@ -46,22 +48,28 @@ object politicalFace {
         |"rowkey":"id",
         |"columns":{
         |"id":{"cf":"rowkey","col":"id","type":"string"},
-        |"politicalFace":{"cf":"cf","col":"politicalFace","type":"string"}
+        |"job":{"cf":"cf","col":"job","type":"string"}
         |}}
       """.stripMargin
-    resDF.write
+    resultDF.write
       .option(HBaseTableCatalog.tableCatalog, catalogwrite)
       .format("org.apache.spark.sql.execution.datasources.hbase")
       .save()
 
-//    查看结果，需注释上方写操作
+
+//    查看运行结果，要先注释前面的写入操作
 //    spark.read
 //      .option(HBaseTableCatalog.tableCatalog, catalogwrite)
 //      .format("org.apache.spark.sql.execution.datasources.hbase")
 //      .load()
 //      .show()
 
+
+
+
+
     spark.stop()
+
   }
 
 }
