@@ -38,8 +38,8 @@ object nativePlace {
 
 
 //    数据处理
-//    查询归属地,调用阿里云api
-    val getCity= (mobile: String)=> {
+//    查询归属地所在市,调用阿里云api
+    val getCity = (mobile: String)=> {
       val appcode = "244e9f8e5da04ce8b36568fa6d0fa92a"
       val httpClient = HttpClients.createDefault()    // 创建 client 实例
       val url = "http://jisusjhmcx.market.alicloudapi.com/shouji/query?shouji=" + mobile
