@@ -4,6 +4,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.execution.datasources.hbase.HBaseTableCatalog
 import org.apache.spark.sql.functions.when
 
+//人口属性：婚姻状况
 object marriage {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()

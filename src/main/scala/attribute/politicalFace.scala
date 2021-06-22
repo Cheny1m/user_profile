@@ -4,6 +4,8 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.execution.datasources.hbase.HBaseTableCatalog
 import org.apache.spark.sql.functions._
 
+
+//人口属性：政治面貌
 object politicalFace {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
