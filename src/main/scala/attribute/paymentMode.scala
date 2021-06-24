@@ -33,6 +33,8 @@ object paymentMode {
 
     source.show(20, false)
 
+
+    //计算所有订单支付最多的方式
     val result = source.groupBy('memberId, 'paymentCode)
       .agg(count('paymentCode) as "count")
       .withColumn("row_num", row_number() over Window.partitionBy('memberId).orderBy('count.desc))
