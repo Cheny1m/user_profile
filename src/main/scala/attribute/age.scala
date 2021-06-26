@@ -5,6 +5,7 @@ import org.apache.spark.sql.execution.datasources.hbase.HBaseTableCatalog
 import org.apache.spark.sql.functions._
 
 //人口属性：年龄段
+
 object age {
 
   def main(args: Array[String]): Unit = {

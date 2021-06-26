@@ -5,6 +5,7 @@ import org.apache.spark.sql.execution.datasources.hbase.HBaseTableCatalog
 import org.apache.spark.sql.functions.when
 
 //人口属性：国籍
+
 object nationality {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()

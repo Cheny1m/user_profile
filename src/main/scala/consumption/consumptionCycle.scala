@@ -4,6 +4,7 @@ import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.apache.spark.sql.execution.datasources.hbase.HBaseTableCatalog
 import org.apache.spark.sql.functions._
 
+//消费特征：消费周期
 
 object consumptionCycle {
   def main(args: Array[String]): Unit = {

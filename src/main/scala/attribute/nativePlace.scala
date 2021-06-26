@@ -11,6 +11,7 @@ import org.apache.spark.sql.execution.datasources.hbase.HBaseTableCatalog
 
 
 //人口属性：籍贯（市）
+
 object nativePlace {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
