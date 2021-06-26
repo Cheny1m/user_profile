@@ -51,31 +51,32 @@ object gender {
         |"gender":{"cf":"cf","col":"gender","type":"string"}
         |}}
       """.stripMargin
-    resDF.write
-        .option(HBaseTableCatalog.tableCatalog, catalogwrite)
-        .option(HBaseTableCatalog.newTable,"5")
-        .format("org.apache.spark.sql.execution.datasources.hbase")
-        .save()
+//    resDF.write
+//        .option(HBaseTableCatalog.tableCatalog, catalogwrite)
+//        .option(HBaseTableCatalog.newTable,"5")
+//        .format("org.apache.spark.sql.execution.datasources.hbase")
+//        .save()
 
 
 
 //    写入mysql
-//    resDF.write.format("jdbc").mode(SaveMode.Overwrite)
-//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-//      .option("dbtable","up_gender")
-//      .option("user","root")
-//      .option("password","mysqlroot")
-//      .save()
+    resDF.select('id.cast("int") as "id",'gender)
+      .write.format("jdbc").mode(SaveMode.Overwrite)
+      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+      .option("dbtable","up_gender")
+      .option("user","root")
+      .option("password","mysqlroot")
+      .save()
 
 //    查看mysql数据
-//    spark.read
-//      .format("jdbc")
-//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-//      .option("dbtable","up_gender")
-//      .option("user","root")
-//      .option("password","mysqlroot")
-//      .load()
-//      .show()
+    spark.read
+      .format("jdbc")
+      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+      .option("dbtable","up_gender")
+      .option("user","root")
+      .option("password","mysqlroot")
+      .load()
+      .show()
 
 
     spark.stop()

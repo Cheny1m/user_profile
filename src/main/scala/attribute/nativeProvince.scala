@@ -83,33 +83,35 @@ object nativeProvince {
         |"rowkey":"id",
         |"columns":{
         |"id":{"cf":"rowkey","col":"id","type":"string"},
+        |"nativePlace":{"cf":"cf","col":"nativePlace","type":"string"},
         |"nativeProvince":{"cf":"cf","col":"nativeProvince","type":"string"}
         |}}
       """.stripMargin
     val res = spark.read
-      .option(HBaseTableCatalog.tableCatalog, catalogres)
+      .option(HBaseTableCatalog.tableCatalog, catalogwrite)
       .format("org.apache.spark.sql.execution.datasources.hbase")
       .load()
 //    res.show(950)
 
 
 //    写入mysql
-//    res.write.format("jdbc").mode(SaveMode.Overwrite)
-//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-//      .option("dbtable","up_nativeProvince")
-//      .option("user","root")
-//      .option("password","mysqlroot")
-//      .save()
+    res.select('id.cast("int") as "id",'nativeProvince)
+      .write.format("jdbc").mode(SaveMode.Overwrite)
+      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+      .option("dbtable","up_nativeProvince")
+      .option("user","root")
+      .option("password","mysqlroot")
+      .save()
 
 //    查看mysql数据
-//    spark.read
-//      .format("jdbc")
-//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-//      .option("dbtable","up_nativeProvince")
-//      .option("user","root")
-//      .option("password","mysqlroot")
-//      .load()
-//      .show()
+    spark.read
+      .format("jdbc")
+      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+      .option("dbtable","up_nativeProvince")
+      .option("user","root")
+      .option("password","mysqlroot")
+      .load()
+      .show()
 
 
 

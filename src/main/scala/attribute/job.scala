@@ -52,10 +52,10 @@ object job {
         |"job":{"cf":"cf","col":"job","type":"string"}
         |}}
       """.stripMargin
-    resultDF.write
-      .option(HBaseTableCatalog.tableCatalog, catalogwrite)
-      .format("org.apache.spark.sql.execution.datasources.hbase")
-      .save()
+//    resultDF.write
+//      .option(HBaseTableCatalog.tableCatalog, catalogwrite)
+//      .format("org.apache.spark.sql.execution.datasources.hbase")
+//      .save()
 
 
 //    查看运行结果，要先注释前面的写入操作
@@ -67,22 +67,23 @@ object job {
 
 
 //    写入mysql
-//    resultDF.write.format("jdbc").mode(SaveMode.Overwrite)
-//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-//      .option("dbtable","up_job")
-//      .option("user","root")
-//      .option("password","mysqlroot")
-//      .save()
+    resultDF.select('id.cast("int") as "id",'job)
+      .write.format("jdbc").mode(SaveMode.Overwrite)
+      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+      .option("dbtable","up_job")
+      .option("user","root")
+      .option("password","mysqlroot")
+      .save()
 //
 //    查看mysql数据
-//    spark.read
-//      .format("jdbc")
-//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-//      .option("dbtable","up_job")
-//      .option("user","root")
-//      .option("password","mysqlroot")
-//      .load()
-//      .show()
+    spark.read
+      .format("jdbc")
+      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+      .option("dbtable","up_job")
+      .option("user","root")
+      .option("password","mysqlroot")
+      .load()
+      .show()
 
 
 
