@@ -1,10 +1,9 @@
-package attribute
+package consumption
 
-
-import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.execution.datasources.hbase.HBaseTableCatalog
 import org.apache.spark.sql.expressions.Window
-import org.apache.spark.sql.functions._
+import org.apache.spark.sql.functions.{count, row_number}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
 object paymentMode {
   def main(args: Array[String]): Unit = {
