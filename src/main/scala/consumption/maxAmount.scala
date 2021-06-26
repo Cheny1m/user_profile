@@ -16,18 +16,38 @@ object maxAmount {
     import  spark.implicits._
 
 
+    def catalog =
+      """{
+        |"table":{"namespace":"default","name":"tbl_orders"},
+        |"rowkey":"id",
+        |"columns":{
+        |"id":{"cf":"rowkey","col":"id","type":"string"},
+        |"memberId":{"cf":"cf","col":"memberId","type":"string"},
+        |"orderAmount":{"cf":"cf","col":"orderAmount","type":"string"},
+        |"orderStatus":{"cf":"cf","col":"orderStatus","type":"string"}
+        |}}
+      """.stripMargin
 //    读数据
     val readDF = spark.read
-      .format("jdbc")
-      .option("url","jdbc:mysql://master:3306/tags_dat")
-      .option("dbtable","user_maxAmount")
-      .option("user","root")
-      .option("password","mysqlroot")
+      .option(HBaseTableCatalog.tableCatalog, catalog)
+      .option(HBaseTableCatalog.newTable,"5")
+      .format("org.apache.spark.sql.execution.datasources.hbase")
       .load()
+
+//    取会员id后三位、只保留完成订单、订单金额转int
+    readDF.select('memberId.cast("int").mod(1000) as "mid",'orderAmount,'orderStatus)
+      .where('orderStatus === "202")
+      .select('mid as "id",'orderAmount.cast("int") as "orderAmount")
+      .createOrReplaceTempView("temp")
+
+//  查询每个id最大金额
+    val tempDF = spark.sql("select id,max(orderAmount) `maxAmount` from temp group by id")
+
+
 //    readDF.show()
 
 //    数据处理
-    val result = readDF.select('id,'maxAmount as "amount")
+    val result = tempDF.select('id,'maxAmount as "amount")
       .select('id,
         when('amount >= 50000 ,"50000及以上")
         .when('amount >= 20000,"20000-49999")
@@ -62,7 +82,7 @@ object maxAmount {
 //      .show(950,false)
 
 //    写入mysql
-    result.select('id.cast("int") as "id",'maxAmount)
+    result
       .write.format("jdbc").mode(SaveMode.Overwrite)
       .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
       .option("dbtable","up_maxAmount")

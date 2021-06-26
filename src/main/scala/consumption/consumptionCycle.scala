@@ -22,7 +22,8 @@ object consumptionCycle {
         |"columns":{
         |"id":{"cf":"rowkey","col":"id","type":"string"},
         |"memberId":{"cf":"cf","col":"memberId","type":"string"},
-        |"finishTime":{"cf":"cf","col":"finishTime","type":"string"}
+        |"finishTime":{"cf":"cf","col":"finishTime","type":"string"},
+        |"orderStatus":{"cf":"cf","col":"orderStatus","type":"string"}
         |}}
       """.stripMargin
     val readDF = spark.read
@@ -31,11 +32,14 @@ object consumptionCycle {
       .load()
 //    readDF.show()
 
-    readDF.select('memberId.cast("int") as "mid",'finishTime.cast("int")as "finishTime")
+//    取会员后三位、完成时间类型转换，只保留完成订单、统计订单数、最早最晚订单
+    readDF.select('memberId.cast("int") as "mid",'finishTime.cast("int")as "finishTime",'orderStatus)
+      .where('orderStatus === "202")
       .select('mid.mod(1000) as "id", 'finishTime)
       .createOrReplaceTempView("temp")
     val tempDF = spark.sql("select id,count(*) `count`,max(finishTime) `max`,min(finishTime) `min` from temp group by id")
 
+//    得到消费周期画像
     val result = tempDF.select('id,(('max - 'min) / 'count) as "interval")
       .select('id,
         when('interval >= 60*60*24*30*6,"6月")
