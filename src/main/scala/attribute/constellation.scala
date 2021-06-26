@@ -1,6 +1,6 @@
 package attribute
 
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.apache.spark.sql.execution.datasources.hbase.HBaseTableCatalog
 import org.apache.spark.sql.functions._
 
@@ -71,6 +71,27 @@ object constellation {
 //      .format("org.apache.spark.sql.execution.datasources.hbase")
 //      .load()
 //      .show()
+
+
+
+//    写入mysql
+//    resultDF.write.format("jdbc").mode(SaveMode.Overwrite)
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_constellation")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .save()
+//
+//    查看mysql数据
+//    spark.read
+//      .format("jdbc")
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_constellation")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .load()
+//      .show()
+
 
     spark.stop()
   }

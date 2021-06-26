@@ -1,7 +1,7 @@
 package attribute
 
 
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
@@ -53,14 +53,14 @@ object nativeProvince {
       if(res == "") "未知" else res
     }
     //    查询每个手机归属地
-    val resultDF = readDF.rdd.map(row => {
-      val s1 = row.getAs[String](0)
-      val s2 = row.getAs[String](1)
-      (s1,getProvince(s2))
-    }).toDF("id","nativeProvince")
+//    val resultDF = readDF.rdd.map(row => {
+//      val s1 = row.getAs[String](0)
+//      val s2 = row.getAs[String](1)
+//      (s1,getProvince(s2))
+//    }).toDF("id","nativeProvince")
 //    resultDF.show(950)
 
-    //    写数据
+    //    写入hbase
     def catalogwrite =
       """{
         |"table":{"namespace":"default","name":"user_profile"},
@@ -70,30 +70,46 @@ object nativeProvince {
         |"nativeProvince":{"cf":"cf","col":"nativeProvince","type":"string"}
         |}}
       """.stripMargin
-    resultDF.write
-      .option(HBaseTableCatalog.tableCatalog, catalogwrite)
-      .format("org.apache.spark.sql.execution.datasources.hbase")
-      .save()
+//    resultDF.write
+//      .option(HBaseTableCatalog.tableCatalog, catalogwrite)
+//      .format("org.apache.spark.sql.execution.datasources.hbase")
+//      .save()
 
 
 //    查看运行结果，要先注释上面的数据处理和写数据
-//    def catalogres =
-//      """{
-//        |"table":{"namespace":"default","name":"user_profile"},
-//        |"rowkey":"id",
-//        |"columns":{
-//        |"id":{"cf":"rowkey","col":"id","type":"string"},
-//        |"nativeProvince":{"cf":"cf","col":"nativeProvince","type":"string"},
-//        |"nativePlace":{"cf":"cf","col":"nativePlace","type":"string"}
-//        |}}
-//      """.stripMargin
-//        spark.read
-//          .option(HBaseTableCatalog.tableCatalog, catalogres)
-//          .format("org.apache.spark.sql.execution.datasources.hbase")
-//          .load()
-//          .show(950)
+    def catalogres =
+      """{
+        |"table":{"namespace":"default","name":"user_profile"},
+        |"rowkey":"id",
+        |"columns":{
+        |"id":{"cf":"rowkey","col":"id","type":"string"},
+        |"nativeProvince":{"cf":"cf","col":"nativeProvince","type":"string"}
+        |}}
+      """.stripMargin
+    val res = spark.read
+      .option(HBaseTableCatalog.tableCatalog, catalogres)
+      .format("org.apache.spark.sql.execution.datasources.hbase")
+      .load()
+//    res.show(950)
 
 
+//    写入mysql
+//    res.write.format("jdbc").mode(SaveMode.Overwrite)
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_nativeProvince")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .save()
+
+//    查看mysql数据
+//    spark.read
+//      .format("jdbc")
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_nativeProvince")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .load()
+//      .show()
 
 
 
