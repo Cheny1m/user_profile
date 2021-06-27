@@ -37,8 +37,6 @@ object PageBrowse {
     //分类页:3
     //商品页:4
     //订单页:5
-    //购物车页:6
-    //其他页面：0
 
     var result: DataFrame = df
       .select('global_user_id.cast("int").as("id"), 'loc_url, 'log_time,
