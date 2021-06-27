@@ -65,7 +65,7 @@ object ALSModel {
       .setLabelCol("rating")
       .setPredictionCol("predict")
       .setMetricName("rmse")
-    )
+
     trainSet.show(10, false)
     // 通过训练集进行训练，建立模型
     val model: ALSModel = als.fit(trainSet)
