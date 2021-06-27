@@ -8,8 +8,8 @@ import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.execution.datasources.hbase.HBaseTableCatalog
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{DataTypes, LongType}
-
-object ALSModel {
+//存储商品推荐模型，基于ALS算法，通过tbl_logs表中用户访问界面的次数来打分
+object productFavorModel {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
       .appName("GenderName")
@@ -31,7 +31,7 @@ object ALSModel {
 
 
 
-    val url2ProductId = udf(getProductId _)
+    val urltoProductId = udf(getProductId _)
 
     val logsDF: DataFrame = spark.read
       .option(HBaseTableCatalog.tableCatalog, logsCatalog)
@@ -40,11 +40,13 @@ object ALSModel {
 
     val ratingDF = logsDF.select(
       'global_user_id.as("userId").cast(DataTypes.IntegerType),
-      url2ProductId('loc_url).as("productId").cast(DataTypes.IntegerType)
+      urltoProductId('loc_url).as("productId").cast(DataTypes.IntegerType)
     ).filter('productId.isNotNull)
       .groupBy('userId, 'productId)
       .agg(count('productId) as "rating")
 
+//    println("hello")
+    ratingDF.show(10)
     val als = new ALS()
       .setUserCol("userId")
       .setItemCol("productId")
@@ -66,12 +68,14 @@ object ALSModel {
       .setPredictionCol("predict")
       .setMetricName("rmse")
 
-    trainSet.show(10, false)
+//    trainSet.show(10, false)
     // 通过训练集进行训练，建立模型
     val model: ALSModel = als.fit(trainSet)
 
+    model.save("model/productFavorModel")
+
     // 通过模型进行预测
-    val predictions = model.transform(trainSet)
+    val predictions = model.transform(testSet)
 
     val rmse = evaluator.evaluate(predictions)
 
@@ -94,7 +98,7 @@ object ALSModel {
     productId
   }
 
-  def predict2String(arr: Seq[Row]) = {
+  def predicttoString(arr: Seq[Row]) = {
     arr.map(_.getAs[Int]("productId")).mkString(",")
   }
 }
