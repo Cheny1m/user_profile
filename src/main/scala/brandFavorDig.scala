@@ -6,6 +6,7 @@ import org.apache.spark.sql.functions.{when, _}
 import org.apache.spark.sql.types.{DataTypes, LongType}
 import org.apache.log4j.{Level, Logger}
 
+//品牌偏好挖掘
 object brandFavorDig {
   def main(args: Array[String]): Unit = {
     Logger.getLogger("org.apache.spark").setLevel(Level.WARN)

@@ -5,7 +5,8 @@ import org.apache.spark.sql.execution.datasources.hbase.HBaseTableCatalog
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{DataTypes, LongType}
 import org.apache.log4j.{Level, Logger}
-//利用ALS进行协同过滤推荐，通过tbl_logs表中用户访问界面的次数来打分
+
+//商品偏好挖掘
 object productFavorDig {
   def main(args: Array[String]): Unit = {
     Logger.getLogger("org.apache.spark").setLevel(Level.WARN)

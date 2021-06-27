@@ -8,6 +8,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{DataTypes, LongType}
 import org.apache.log4j.{Level, Logger}
 
+//品牌偏好挖掘模型，基于ALS算法，通过tbl_logs表中用户访问品牌的次数来打分
 object brandFavorModel {
   def main(args: Array[String]): Unit = {
     Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
@@ -69,33 +70,33 @@ object brandFavorModel {
 
     val tempDF = spark
       .sql("select ratingDF.userId, brandId, rating from products LEFT OUTER JOIN ratingDF ON products.productId = ratingDF.productId")
-      .na.drop(List("rating"))
+//      .na.drop(List("rating"))
 
     val tempDF2 = tempDF.select('userId,
       'brandId .cast(DataTypes.IntegerType),
       'rating
     )
 
-    //    tempDF2.show(100, false)
+//    tempDF2.show(100, false)
 
-    val als = new ALS()
-      .setUserCol("userId")
-      .setItemCol("brandId")
-      .setRatingCol("rating")
-      .setPredictionCol("predict")
-      .setColdStartStrategy("drop")
-      .setAlpha(10)
-      .setMaxIter(10)
-      .setRank(10)
-      .setRegParam(1.0)
-      .setImplicitPrefs(true)
-
-    val model: ALSModel = als.fit(tempDF2)
-
-    model.save("model/brandFavorModel")
-    println("savesavesave!!!!!!!!!!!!!!!!!!!!!!")
-
-    spark.stop()
+//    val als = new ALS()
+//      .setUserCol("userId")
+//      .setItemCol("brandId")
+//      .setRatingCol("rating")
+//      .setPredictionCol("predict")
+//      .setColdStartStrategy("drop")
+//      .setAlpha(10)
+//      .setMaxIter(10)
+//      .setRank(10)
+//      .setRegParam(1.0)
+//      .setImplicitPrefs(true)
+//
+//    val model: ALSModel = als.fit(tempDF2)
+//
+//    model.save("model/brandFavorModel")
+//    println("savesavesave!!!!!!!!!!!!!!!!!!!!!!")
+//
+//    spark.stop()
   }
 
   def getProductId(url: String) = {
