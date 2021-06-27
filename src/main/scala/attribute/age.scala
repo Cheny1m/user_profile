@@ -56,10 +56,10 @@ object age {
         |"age":{"cf":"cf","col":"age","type":"string"}
         |}}
       """.stripMargin
-//    resDF.write
-//      .option(HBaseTableCatalog.tableCatalog,catalogwrite)
-//      .format("org.apache.spark.sql.execution.datasources.hbase")
-//      .save()
+    resDF.write
+      .option(HBaseTableCatalog.tableCatalog,catalogwrite)
+      .format("org.apache.spark.sql.execution.datasources.hbase")
+      .save()
 
 //    查看habse数据，需注释上面写操作再查看
 //    spark.read
@@ -70,23 +70,23 @@ object age {
 
 
 //    写入mysql
-    resDF.select('id.cast("int") as "id",'age)
-      .write.format("jdbc").mode(SaveMode.Overwrite)
-      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-      .option("dbtable","up_age")
-      .option("user","root")
-      .option("password","mysqlroot")
-      .save()
+//    resDF.select('id.cast("int") as "id",'age)
+//      .write.format("jdbc").mode(SaveMode.Overwrite)
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_age")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .save()
 
 //    查看mysql数据
-    spark.read
-      .format("jdbc")
-      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-      .option("dbtable","up_age")
-      .option("user","root")
-      .option("password","mysqlroot")
-      .load()
-      .show()
+//    spark.read
+//      .format("jdbc")
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_age")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .load()
+//      .show()
 
 
     spark.stop()

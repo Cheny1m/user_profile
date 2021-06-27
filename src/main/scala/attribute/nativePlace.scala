@@ -21,21 +21,47 @@ object nativePlace {
 
     import  spark.implicits._
 
-//    读数据
-    def catalog =
-      """{
-        |"table":{"namespace":"default","name":"tbl_users"},
-        |"rowkey":"id",
-        |"columns":{
-        |"id":{"cf":"rowkey","col":"id","type":"string"},
-        |"mobile":{"cf":"cf","col":"mobile","type":"string"}
-        |}}
-      """.stripMargin
-    val readDF = spark.read
-      .option(HBaseTableCatalog.tableCatalog, catalog)
-      .format("org.apache.spark.sql.execution.datasources.hbase")
-      .load()
+//    从hbase读数据
+//    def catalog =
+//      """{
+//        |"table":{"namespace":"default","name":"tbl_users"},
+//        |"rowkey":"id",
+//        |"columns":{
+//        |"id":{"cf":"rowkey","col":"id","type":"string"},
+//        |"mobile":{"cf":"cf","col":"mobile","type":"string"}
+//        |}}
+//      """.stripMargin
+//    val readDF = spark.read
+//      .option(HBaseTableCatalog.tableCatalog, catalog)
+//      .format("org.apache.spark.sql.execution.datasources.hbase")
+//      .load()
 //    readDF.show()
+
+//    从mysql读处理好的数据
+//    val readDF = spark.read
+//      .format("jdbc")
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_nativePlace")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .load()
+//    def catalogmysql =
+//      """{
+//        |"table":{"namespace":"default","name":"user_profile"},
+//        |"rowkey":"id",
+//        |"columns":{
+//        |"id":{"cf":"rowkey","col":"id","type":"string"},
+//        |"nativePlace":{"cf":"cf","col":"nativePlace","type":"string"}
+//        |}}
+//      """.stripMargin
+//    readDF.select('id.cast("string") as "id",'nativePlace)
+//      .write
+//      .option(HBaseTableCatalog.tableCatalog, catalogmysql)
+//      .option(HBaseTableCatalog.newTable,"5")
+//      .format("org.apache.spark.sql.execution.datasources.hbase")
+//      .save()
+
+
 
 
 //    数据处理
@@ -79,30 +105,30 @@ object nativePlace {
 //      .save()
 
 //    查看运行结果，要先注释上面的数据处理和写数据操作
-    val res = spark.read
-      .option(HBaseTableCatalog.tableCatalog, catalogwrite)
-      .format("org.apache.spark.sql.execution.datasources.hbase")
-      .load()
+//    val res = spark.read
+//      .option(HBaseTableCatalog.tableCatalog, catalogwrite)
+//      .format("org.apache.spark.sql.execution.datasources.hbase")
+//      .load()
 //    res.show(950)
 
 //    写入mysql
-    res.select('id.cast("int") as "id",'nativePlace)
-      .write.format("jdbc").mode(SaveMode.Overwrite)
-      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-      .option("dbtable","up_nativePlace")
-      .option("user","root")
-      .option("password","mysqlroot")
-      .save()
+//    res.select('id.cast("int") as "id",'nativePlace)
+//      .write.format("jdbc").mode(SaveMode.Overwrite)
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_nativePlace")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .save()
 //
 //    查看mysql数据
-    spark.read
-      .format("jdbc")
-      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-      .option("dbtable","up_nativePlace")
-      .option("user","root")
-      .option("password","mysqlroot")
-      .load()
-      .show()
+//    spark.read
+//      .format("jdbc")
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_nativePlace")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .load()
+//      .show()
 
 
 
