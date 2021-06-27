@@ -18,7 +18,7 @@ object productFavorDig {
     import spark.implicits._
 
     //    加载模型
-//    val model = ALSModel.load("model/Type/productFavorModel")
+//    val model = ALSModel.load("model/productFavorModel")
 
     def logsCatalog =
       s"""{
@@ -61,7 +61,7 @@ object productFavorDig {
 
     val model: ALSModel = als.fit(ratingDF)
 
-    model.save("model/Product/productFavorModel")
+    model.save("model/productFavorModel")
 
     spark.stop()
   }

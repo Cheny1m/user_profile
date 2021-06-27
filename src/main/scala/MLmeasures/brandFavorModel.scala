@@ -1,4 +1,4 @@
-package MLmeasures
+package MLmeasure
 
 import org.apache.spark.ml.recommendation.{ALS, ALSModel}
 import org.apache.spark.sql.execution.columnar.STRUCT
@@ -8,12 +8,12 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{DataTypes, LongType}
 import org.apache.log4j.{Level, Logger}
 
-object categoryFavorModel {
+object brandFavorModel {
   def main(args: Array[String]): Unit = {
     Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
 
     val spark = SparkSession.builder()
-      .appName("typeFavor")
+      .appName("brandFavor")
       .master("local")
       .getOrCreate()
 
@@ -67,44 +67,20 @@ object categoryFavorModel {
 
     ratingDF.toDF().createOrReplaceTempView("ratingDF")
 
-
     val tempDF = spark
-      .sql("select ratingDF.userId, products.productType, rating from products LEFT OUTER JOIN ratingDF ON products.productId = ratingDF.productId")
+      .sql("select ratingDF.userId, brandId, rating from products LEFT OUTER JOIN ratingDF ON products.productId = ratingDF.productId")
       .na.drop(List("rating"))
 
-    //    tempDF.show(100, false)
-
-    val tempDF2 = tempDF.select(
-      'userId.cast(DataTypes.IntegerType),
-      when('productType === "电热水器", 1)
-        .when('productType === "燃气灶", 2)
-        .when('productType === "智能电视", 3)
-        .when('productType === "微波炉", 4)
-        .when('productType === "Haier/海尔冰箱", 5)
-        .when('productType === "4K电视", 6)
-        .when('productType === "烟灶套系", 7)
-        .when('productType === "空气净化器", 8)
-        .when('productType === "净水机", 9)
-        .when('productType === "滤芯", 10)
-        .when('productType === "电饭煲", 11)
-        .when('productType === "料理机", 12)
-        .when('productType === "吸尘器/除螨仪", 13)
-        .when('productType === "电磁炉", 14)
-        .when('productType === "前置过滤器", 15)
-        .when('productType === "电水壶/热水瓶", 16)
-        .when('productType === "LED电视", 17)
-        .when('productType === "取暖电器", 18)
-        .when('productType === "烤箱", 19)
-        .when('productType === "嵌入式厨电", 20)
-        .otherwise(0).as('productType).cast(DataTypes.IntegerType),
+    val tempDF2 = tempDF.select('userId,
+      'brandId .cast(DataTypes.IntegerType),
       'rating
     )
 
-    //    tempDF2.show()
+    //    tempDF2.show(100, false)
 
     val als = new ALS()
       .setUserCol("userId")
-      .setItemCol("productType")
+      .setItemCol("brandId")
       .setRatingCol("rating")
       .setPredictionCol("predict")
       .setColdStartStrategy("drop")
@@ -116,7 +92,8 @@ object categoryFavorModel {
 
     val model: ALSModel = als.fit(tempDF2)
 
-    model.save("model/categoryFavorModel")
+    model.save("model/brandFavorModel")
+    println("savesavesave!!!!!!!!!!!!!!!!!!!!!!")
 
     spark.stop()
   }
@@ -134,7 +111,7 @@ object categoryFavorModel {
   }
 
   def predicttoString(arr: Seq[Row]) = {
-    arr.map(_.getAs[Int]("productType")).mkString(",")
+    arr.map(_.getAs[Int]("productId")).mkString(",")
   }
 
 }

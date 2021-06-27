@@ -72,7 +72,7 @@ object productFavorModel {
     // 通过训练集进行训练，建立模型
     val model: ALSModel = als.fit(trainSet)
 
-    model.save("model/Type/productFavorModel")
+    model.save("model/productFavorModel")
 
     // 通过模型进行预测
     val predictions = model.transform(testSet)

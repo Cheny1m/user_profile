@@ -20,7 +20,7 @@ object categoryFavorDig {
     import spark.implicits._
 
     //    加载模型
-    val model = ALSModel.load("model/Type/categoryFavorModel")
+    val model = ALSModel.load("model/categoryFavorModel")
 
     val predicttoStringFunc = udf(predicttoString _)
 
