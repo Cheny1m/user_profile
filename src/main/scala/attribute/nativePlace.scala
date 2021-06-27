@@ -1,7 +1,7 @@
 package attribute
 
 
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
@@ -11,6 +11,7 @@ import org.apache.spark.sql.execution.datasources.hbase.HBaseTableCatalog
 
 
 //人口属性：籍贯（市）
+
 object nativePlace {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
@@ -55,14 +56,14 @@ object nativePlace {
       if(res == "") "未知" else res
     }
 //    查询每个手机归属地
-    val resultDF = readDF.rdd.map(row => {
-      val s1 = row.getAs[String](0)
-      val s2 = row.getAs[String](1)
-      (s1,getCity(s2))
-    }).toDF("id","nativePlace")
+//    val resultDF = readDF.rdd.map(row => {
+//      val s1 = row.getAs[String](0)
+//      val s2 = row.getAs[String](1)
+//      (s1,getCity(s2))
+//    }).toDF("id","nativePlace")
 //    resultDF.show(950)
 
-//    写数据
+//    写入hbase
     def catalogwrite =
       """{
         |"table":{"namespace":"default","name":"user_profile"},
@@ -72,17 +73,39 @@ object nativePlace {
         |"nativePlace":{"cf":"cf","col":"nativePlace","type":"string"}
         |}}
       """.stripMargin
-    resultDF.write
-      .option(HBaseTableCatalog.tableCatalog, catalogwrite)
-      .format("org.apache.spark.sql.execution.datasources.hbase")
-      .save()
-
-//    查看运行结果，要先注释上面的数据处理和写数据操作
-//    spark.read
+//    resultDF.write
 //      .option(HBaseTableCatalog.tableCatalog, catalogwrite)
 //      .format("org.apache.spark.sql.execution.datasources.hbase")
-//      .load()
-//      .show(950)
+//      .save()
+
+//    查看运行结果，要先注释上面的数据处理和写数据操作
+    val res = spark.read
+      .option(HBaseTableCatalog.tableCatalog, catalogwrite)
+      .format("org.apache.spark.sql.execution.datasources.hbase")
+      .load()
+//    res.show(950)
+
+//    写入mysql
+    res.select('id.cast("int") as "id",'nativePlace)
+      .write.format("jdbc").mode(SaveMode.Overwrite)
+      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+      .option("dbtable","up_nativePlace")
+      .option("user","root")
+      .option("password","mysqlroot")
+      .save()
+//
+//    查看mysql数据
+    spark.read
+      .format("jdbc")
+      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+      .option("dbtable","up_nativePlace")
+      .option("user","root")
+      .option("password","mysqlroot")
+      .load()
+      .show()
+
+
+
 
 
 

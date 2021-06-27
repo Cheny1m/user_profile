@@ -1,4 +1,4 @@
-package gr
+package behaviour
 
 import org.apache.spark.sql.SparkSession
 
