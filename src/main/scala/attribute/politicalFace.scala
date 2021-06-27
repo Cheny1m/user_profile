@@ -52,10 +52,10 @@ object politicalFace {
         |"politicalFace":{"cf":"cf","col":"politicalFace","type":"string"}
         |}}
       """.stripMargin
-//    resDF.write
-//      .option(HBaseTableCatalog.tableCatalog, catalogwrite)
-//      .format("org.apache.spark.sql.execution.datasources.hbase")
-//      .save()
+    resDF.write
+      .option(HBaseTableCatalog.tableCatalog, catalogwrite)
+      .format("org.apache.spark.sql.execution.datasources.hbase")
+      .save()
 
 //    查看结果，需注释上方写操作
 //    spark.read
@@ -66,23 +66,23 @@ object politicalFace {
 
 
 //    写入mysql
-    resDF.select('id.cast("int") as "id",'politicalFace)
-      .write.format("jdbc").mode(SaveMode.Overwrite)
-      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-      .option("dbtable","up_politicalFace")
-      .option("user","root")
-      .option("password","mysqlroot")
-      .save()
+//    resDF.select('id.cast("int") as "id",'politicalFace)
+//      .write.format("jdbc").mode(SaveMode.Overwrite)
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_politicalFace")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .save()
 
 //    查看mysql数据
-    spark.read
-      .format("jdbc")
-      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-      .option("dbtable","up_politicalFace")
-      .option("user","root")
-      .option("password","mysqlroot")
-      .load()
-      .show()
+//    spark.read
+//      .format("jdbc")
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_politicalFace")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .load()
+//      .show()
 
     spark.stop()
   }
