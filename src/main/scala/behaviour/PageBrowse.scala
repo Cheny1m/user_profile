@@ -43,24 +43,26 @@ object PageBrowse {
     var result: DataFrame = df
       .select('global_user_id.cast("int").as("id"), 'loc_url, 'log_time,
         when('loc_url.like("%login%"), 1).otherwise(0)
-          .as("登录页"),
+          .as("login"),
         when('loc_url.like("%eshop.com/"), 1)
           .when('loc_url.like("%m.eshop.com/?source=mobile"), 1).otherwise(0)
-          .as("首页"),
+          .as("eshop"),
         when('loc_url.like("%/itemlist/%"), 1)
           .when('loc_url.like("%/l/%"), 1).otherwise(0)
-          .as("分类页"),
+          .as("itemlist"),
         when('loc_url.like("%/item/%"), 1)
           .when('loc_url.like("%/product/%"), 1).otherwise(0)
-          .as("商品页"),
+          .as("product"),
         when('loc_url.like("%/order/%"), 1).otherwise(0)
-          .as("订单页")
+          .as("order")
       )
       .groupBy('id)
-      .sum("登录页", "首页", "分类页", "商品页", "订单页"
-        //,"购物车页"
+      .sum("login", "eshop", "itemlist", "product", "order"
       )
       .sort('id)
+
+    val newColumns = Seq("id","login", "eshop", "itemlist", "product", "order")
+    result = result.toDF(newColumns:_*)
 
     result.show(false)
 
