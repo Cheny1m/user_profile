@@ -65,7 +65,31 @@ object ProductPurchasing {
       )
       .sort('id.asc)
 
-    result1.show(false)
+    //合并
+//    result1.show(false)
+//    val result2 = result1
+//      .repartition('productId)
+//      .sortWithinPartitions('productId, length('productName).desc)
+//      .toDF()
+//
+//    val result3 = result2
+//      .groupBy("id", "productId")
+//      .agg(collect_list("productName").as("combined_list"))
+//      //去掉大括号以便处理
+//      .withColumn("combined_list", concat_ws(",", col("combined_list")))
+//      .select('id, 'productId, split('combined_list, "\\,")(0).as("productName"))
+//      .sort('id.asc)
+//
+//    val result4 = result3
+//      .groupBy("id")
+//      .agg(collect_list("productName").as("combined_list"))
+//      .withColumn("productPurchased", concat_ws(",", col("combined_list")))
+//      .drop("combined_list")
+//      .sort('id.asc)
+//    //        result2.show(false)
+//    result4.show(false)
+
+    //分开
     val result2 = result1
       .repartition('productId)
       .sortWithinPartitions('productId, length('productName).desc)
@@ -76,19 +100,12 @@ object ProductPurchasing {
       .agg(collect_list("productName").as("combined_list"))
       //去掉大括号以便处理
       .withColumn("combined_list", concat_ws(",", col("combined_list")))
-      .select('id, 'productId, split('combined_list, "\\,")(0).as("productName"))
+      .select('id,
+        split('combined_list, "\\,")(0).as("productName"))
       .sort('id.asc)
+    result3.show(false)
 
-    val result4 = result3
-      .groupBy("id")
-      .agg(collect_list("productName").as("combined_list"))
-      .withColumn("productPurchased", concat_ws(",", col("combined_list")))
-      .drop("combined_list")
-      .sort('id.asc)
-    //        result2.show(false)
-    result4.show(false)
-
-    result4
+    result3
       .write.format("jdbc").mode(SaveMode.Overwrite)
       .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
       .option("dbtable","up_ProductPurchasing")
@@ -107,7 +124,6 @@ object ProductPurchasing {
       .show()
 
     spark.stop()
-
 
   }
 }
