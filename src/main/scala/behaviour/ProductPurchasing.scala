@@ -26,7 +26,8 @@ object ProductPurchasing {
          |"columns":{
          |"id":{"cf":"rowkey", "col":"id", "type":"string"},
          |"orderSn":{"cf":"cf", "col":"orderSn", "type":"string"},
-         |"memberId":{"cf":"cf", "col":"memberId", "type":"string"}
+         |"memberId":{"cf":"cf", "col":"memberId", "type":"string"},
+         |"finishTime":{"cf":"cf", "col":"finishTime", "type":"string"}
          |}
          |}""".stripMargin
 
@@ -44,15 +45,18 @@ object ProductPurchasing {
       .load()
       .toDF()
 
-    val readDF_orders: DataFrame = spark.read
+    var readDF_orders: DataFrame = spark.read
       .option(HBaseTableCatalog.tableCatalog, catalog_orders)
       .format("org.apache.spark.sql.execution.datasources.hbase")
       .load()
-      .toDF()
       .drop('id)
       //添加列名为user_id的列，也就是取memberid后三位
       .withColumn("id", col("memberId").substr(-3, 3).cast("int"))
+      .select('id,'orderSn,'finishTime.cast("int") as "finishTime")
+      .where('id<=950)
 
+//    readDF_orders.createOrReplaceTempView("t")
+//    readDF_orders = spark.sql("select t.id,orderSn from t join (select id,max(finishTime) `finishTime` from t group by id) tt on t.id=tt.id where t.finishTime = tt.finishTime")
 
     val result1 = readDF_orders.join(readDF_goods, readDF_orders.col("orderSn") === readDF_goods.col("cOrderSn"))
       .select(
@@ -101,27 +105,45 @@ object ProductPurchasing {
       //去掉大括号以便处理
       .withColumn("combined_list", concat_ws(",", col("combined_list")))
       .select('id,
-        split('combined_list, "\\,")(0).as("productName"))
+        split('combined_list, "\\,")(0).as("purchaseName"))
       .sort('id.asc)
-    result3.show(false)
+//    result3.show(false)
 
+    def catalogwrite =
+      """{
+        |"table":{"namespace":"default","name":"user_profile"},
+        |"rowkey":"id",
+        |"columns":{
+        |"id":{"cf":"rowkey","col":"id","type":"string"},
+        |"purchaseName":{"cf":"cf","col":"purchaseName","type":"string"}
+        |}}
+      """.stripMargin
     result3
-      .write.format("jdbc").mode(SaveMode.Overwrite)
-      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-      .option("dbtable","up_ProductPurchasing")
-      .option("user","root")
-      .option("password","mysqlroot")
+      .where('id <= 950)
+      .select('id.cast("string") as "id",'purchaseName)
+      .write
+      .option(HBaseTableCatalog.tableCatalog,catalogwrite)
+      .format("org.apache.spark.sql.execution.datasources.hbase")
       .save()
 
+
+//    result3
+//      .write.format("jdbc").mode(SaveMode.Overwrite)
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_ProductPurchasing")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .save()
+
     //查看mysql数据
-    spark.read
-      .format("jdbc")
-      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-      .option("dbtable","up_ProductPurchasing")
-      .option("user","root")
-      .option("password","mysqlroot")
-      .load()
-      .show()
+//    spark.read
+//      .format("jdbc")
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_ProductPurchasing")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .load()
+//      .show()
 
     spark.stop()
 
