@@ -8,6 +8,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{DataTypes, LongType}
 import org.apache.log4j.{Level, Logger}
 
+//品类偏好挖掘模型，基于ALS算法，通过tbl_logs表中用户访问品类的次数来打分
 object categoryFavorModel {
   def main(args: Array[String]): Unit = {
     Logger.getLogger("org.apache.spark").setLevel(Level.WARN)

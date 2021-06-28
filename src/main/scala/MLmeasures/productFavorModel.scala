@@ -8,7 +8,8 @@ import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.execution.datasources.hbase.HBaseTableCatalog
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{DataTypes, LongType}
-//存储商品推荐模型，基于ALS算法，通过tbl_logs表中用户访问界面的次数来打分
+
+//商品偏好挖掘模型，基于ALS算法，通过tbl_logs表中用户访问商品的次数来打分
 object productFavorModel {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()

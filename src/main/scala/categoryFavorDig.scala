@@ -8,6 +8,7 @@ import org.apache.spark.sql.execution.datasources.hbase.HBaseTableCatalog
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{DataTypes, LongType}
 
+//品类偏好挖掘
 object categoryFavorDig {
   def main(args: Array[String]): Unit = {
     Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
