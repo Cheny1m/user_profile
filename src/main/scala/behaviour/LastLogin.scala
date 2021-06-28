@@ -41,7 +41,7 @@ object LastLogin {
       .sort('lastLoginTime.desc)
     val lasttime = tempDF.head()(1)
     tempDF = tempDF.select('id,abs('lastLoginTime - lasttime) as "interval")
-    tempDF.show()
+//    tempDF.show()
 
     val result = tempDF.select('id,
       when('interval > 14*24*60*60 ,"30天内")
@@ -49,22 +49,25 @@ object LastLogin {
         .when('interval > 24*60*60 ,"7天内")
         .otherwise("1天内")
         .as("lastLogin"))
-    result.show()
+//    result.show()
 
 //    写入hbase
-//    def catalogwrite =
-//      """{
-//        |"table":{"namespace":"default","name":"user_profile"},
-//        |"rowkey":"id",
-//        |"columns":{
-//        |"id":{"cf":"rowkey","col":"id","type":"string"},
-//        |"lastLoginTime":{"cf":"cf","col":"lastLoginTime","type":"string"}
-//        |}}
-//      """.stripMargin
-//    readDF.write
-//      .option(HBaseTableCatalog.tableCatalog,catalogwrite)
-//      .format("org.apache.spark.sql.execution.datasources.hbase")
-//      .save()
+    def catalogwrite =
+      """{
+        |"table":{"namespace":"default","name":"user_profile"},
+        |"rowkey":"id",
+        |"columns":{
+        |"id":{"cf":"rowkey","col":"id","type":"string"},
+        |"lastLogin":{"cf":"cf","col":"lastLogin","type":"string"}
+        |}}
+      """.stripMargin
+    result
+      .where('id <= 950)
+      .select('id.cast("string") as "id",'lastLogin)
+      .write
+      .option(HBaseTableCatalog.tableCatalog,catalogwrite)
+      .format("org.apache.spark.sql.execution.datasources.hbase")
+      .save()
 
 //    查看结果，需注释上面写操作再查看
 //    spark.read
@@ -74,23 +77,23 @@ object LastLogin {
 //      .show()
 
 //    写入mysql
-    result
-      .write.format("jdbc").mode(SaveMode.Overwrite)
-      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-      .option("dbtable","up_lastLogin")
-      .option("user","root")
-      .option("password","mysqlroot")
-      .save()
+//    result
+//      .write.format("jdbc").mode(SaveMode.Overwrite)
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_lastLogin")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .save()
 
 //    查看mysql数据
-    spark.read
-      .format("jdbc")
-      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-      .option("dbtable","up_lastLogin")
-      .option("user","root")
-      .option("password","mysqlroot")
-      .load()
-      .show(950)
+//    spark.read
+//      .format("jdbc")
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_lastLogin")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .load()
+//      .show(950)
 
 
   }

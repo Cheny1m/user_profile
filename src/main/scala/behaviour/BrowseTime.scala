@@ -11,10 +11,10 @@ import org.apache.spark.sql.functions._
 
 //行为特征：浏览时长
 
-object BrowserTime {
+object BrowseTime {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
-      .appName("browserTime")
+      .appName("browseTime")
       .master("local")
       .getOrCreate()
 
@@ -50,28 +50,51 @@ object BrowserTime {
       when('time > 300,"5分钟以上")
         .when('time > 60,"1-5分钟")
         .otherwise("1分钟内")
-        .as("browserTime"))
+        .as("browseTime"))
 
 //    result.show(950)
 
-    //    写入mysql
+
+
+    def catalogWrite =
+      s"""{
+         |"table":{"namespace":"default", "name":"user_profile"},
+         |"rowkey":"id",
+         |"columns":{
+         |  "id":{"cf":"rowkey", "col":"id", "type":"string"},
+         |  "browseTime":{"cf":"cf", "col":"browseTime", "type":"string"}
+         |}
+         |}""".stripMargin
     result
-      .write.format("jdbc").mode(SaveMode.Overwrite)
-      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-      .option("dbtable","up_browserTime")
-      .option("user","root")
-      .option("password","mysqlroot")
+      .where('id<=950)
+      .select('id.cast("string") as "id",'browseTime)
+      .write
+      .option(HBaseTableCatalog.tableCatalog, catalogWrite)
+      .option(HBaseTableCatalog.newTable, "5")
+      .format("org.apache.spark.sql.execution.datasources.hbase")
       .save()
 
+
+
+
+    //    写入mysql
+//    result
+//      .write.format("jdbc").mode(SaveMode.Overwrite)
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_browserTime")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .save()
+
     //    查看mysql数据
-    spark.read
-      .format("jdbc")
-      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-      .option("dbtable","up_browserTime")
-      .option("user","root")
-      .option("password","mysqlroot")
-      .load()
-      .show(950)
+//    spark.read
+//      .format("jdbc")
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_browserTime")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .load()
+//      .show(950)
 
     spark.stop()
   }

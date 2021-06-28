@@ -87,26 +87,46 @@ object BrowsePeriod {
 
     //df1.show(200, false)
 
-    val df3:DataFrame = df1.select("MAXBrowsePeriod")
-    df3.show(200, false)
+    val df3:DataFrame = df1.select('id,'MAXBrowsePeriod as "browsePeriod")
+//    df3.show(200, false)
 
+    def catalogWrite =
+      s"""{
+         |"table":{"namespace":"default", "name":"user_profile"},
+         |"rowkey":"id",
+         |"columns":{
+         |  "id":{"cf":"rowkey", "col":"id", "type":"string"},
+         |  "browsePeriod":{"cf":"cf", "col":"browsePeriod", "type":"string"}
+         |}
+         |}""".stripMargin
     df3
-      .write.format("jdbc").mode(SaveMode.Overwrite)
-      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-      .option("dbtable","up_BrowsePeriod")
-      .option("user","root")
-      .option("password","mysqlroot")
+      .where('id<=950)
+      .select('id.cast("string") as "id",'browsePeriod)
+      .write
+      .option(HBaseTableCatalog.tableCatalog, catalogWrite)
+      .option(HBaseTableCatalog.newTable, "5")
+      .format("org.apache.spark.sql.execution.datasources.hbase")
       .save()
 
+
+
+//    df3
+//      .write.format("jdbc").mode(SaveMode.Overwrite)
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_BrowsePeriod")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .save()
+
     //查看mysql数据
-    spark.read
-      .format("jdbc")
-      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-      .option("dbtable","up_BrowsePeriod")
-      .option("user","root")
-      .option("password","mysqlroot")
-      .load()
-      .show(200)
+//    spark.read
+//      .format("jdbc")
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_BrowsePeriod")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .load()
+//      .show(200)
 
     spark.stop()
   }

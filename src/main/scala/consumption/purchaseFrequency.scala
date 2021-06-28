@@ -55,25 +55,43 @@ object purchaseFrequency {
           .as("purchaseFrequency"))
 //    result.show(950)
 
+    def catalogWrite =
+      s"""{
+         |"table":{"namespace":"default", "name":"user_profile"},
+         |"rowkey":"id",
+         |"columns":{
+         |  "id":{"cf":"rowkey", "col":"id", "type":"string"},
+         |  "purchaseFrequency":{"cf":"cf", "col":"purchaseFrequency", "type":"string"}
+         |}
+         |}""".stripMargin
 
-//    写入mysql
-    result
-      .write.format("jdbc").mode(SaveMode.Overwrite)
-      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-      .option("dbtable","up_purchaseFrequency")
-      .option("user","root")
-      .option("password","mysqlroot")
+    result.where('id<=950)
+      .select('id.cast("string") as "id",'purchaseFrequency)
+      .write
+      .option(HBaseTableCatalog.tableCatalog, catalogWrite)
+      .option(HBaseTableCatalog.newTable, "5")
+      .format("org.apache.spark.sql.execution.datasources.hbase")
       .save()
 
+
+//    写入mysql
+//    result
+//      .write.format("jdbc").mode(SaveMode.Overwrite)
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_purchaseFrequency")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .save()
+
 //    查看mysql数据
-    spark.read
-      .format("jdbc")
-      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-      .option("dbtable","up_purchaseFrequency")
-      .option("user","root")
-      .option("password","mysqlroot")
-      .load()
-      .show()
+//    spark.read
+//      .format("jdbc")
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_purchaseFrequency")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .load()
+//      .show()
 
 
     spark.stop()

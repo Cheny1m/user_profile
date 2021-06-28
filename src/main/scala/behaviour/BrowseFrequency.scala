@@ -67,32 +67,52 @@ object BrowseFrequency {
           .when('BrowseSum >=230  && 'BrowseSum < 255, "较常")
           .when('BrowseSum >= 200 && 'BrowseSum < 230, "偶尔")
           .when('BrowseSum<200 && 'BrowseSum>=0, "很少")
-          .as("BrowseFrequency")
+          .as("browseFrequency")
       )
       .sort('id.asc)
       //对用户进行筛选，直接剔除大于950的
       .where('id <= 950)
       .sort('id.asc)
 
-    result3.show(false)
+    def catalogWrite =
+      s"""{
+         |"table":{"namespace":"default", "name":"user_profile"},
+         |"rowkey":"id",
+         |"columns":{
+         |  "id":{"cf":"rowkey", "col":"id", "type":"string"},
+         |  "browseFrequency":{"cf":"cf", "col":"browseFrequency", "type":"string"}
+         |}
+         |}""".stripMargin
 
     result3
-      .write.format("jdbc").mode(SaveMode.Overwrite)
-      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-      .option("dbtable","up_BrowseFrequency")
-      .option("user","root")
-      .option("password","mysqlroot")
+//      .where('id<=950)
+      .select('id.cast("string") as "id",'browseFrequency)
+      .write
+      .option(HBaseTableCatalog.tableCatalog, catalogWrite)
+      .option(HBaseTableCatalog.newTable, "5")
+      .format("org.apache.spark.sql.execution.datasources.hbase")
       .save()
 
+
+//    result3.show(false)
+//
+//    result3
+//      .write.format("jdbc").mode(SaveMode.Overwrite)
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_BrowseFrequency")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .save()
+
     //查看mysql数据
-    spark.read
-      .format("jdbc")
-      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-      .option("dbtable","up_BrowseFrequency")
-      .option("user","root")
-      .option("password","mysqlroot")
-      .load()
-      .show()
+//    spark.read
+//      .format("jdbc")
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_BrowseFrequency")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .load()
+//      .show()
 
     spark.stop()
 

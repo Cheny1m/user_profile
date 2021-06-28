@@ -21,7 +21,7 @@ object paymentMode {
          |}""".stripMargin
 
     val spark = SparkSession.builder()
-      .appName("shc test")
+      .appName("paymentMode")
       .master("local[10]")
       .getOrCreate()
 
@@ -48,8 +48,11 @@ object paymentMode {
           .when('paymentCode === "balance","余额")
           .when(('paymentCode==="ccb") or ('paymentCode==="chinaecpay") or ('paymentCode==="chinapay"),"银行卡")
           .otherwise("其他方式")
-          .as("paymentCode")
+          .as("paymentMode")
       )
+      .where('id<=950)
+      .select('id.cast("string"),'paymentMode)
+
 
 //    result.show(950, false)
 
@@ -59,36 +62,36 @@ object paymentMode {
          |"rowkey":"id",
          |"columns":{
          |  "id":{"cf":"rowkey", "col":"id", "type":"string"},
-         |  "paymentCode":{"cf":"cf", "col":"paymentCode", "type":"string"}
+         |  "paymentMode":{"cf":"cf", "col":"paymentMode", "type":"string"}
          |}
          |}""".stripMargin
 
-//    result.write
-//      .option(HBaseTableCatalog.tableCatalog, catalogWrite)
-//      .option(HBaseTableCatalog.newTable, "5")
-//      .format("org.apache.spark.sql.execution.datasources.hbase")
-//      .save
+    result.write
+      .option(HBaseTableCatalog.tableCatalog, catalogWrite)
+      .option(HBaseTableCatalog.newTable, "5")
+      .format("org.apache.spark.sql.execution.datasources.hbase")
+      .save()
 
 
 
 //    写入mysql
-    result
-      .write.format("jdbc").mode(SaveMode.Overwrite)
-      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-      .option("dbtable","up_paymentCode")
-      .option("user","root")
-      .option("password","mysqlroot")
-      .save()
+//    result
+//      .write.format("jdbc").mode(SaveMode.Overwrite)
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_paymentMode")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .save()
 
 //    查看mysql数据
-    spark.read
-      .format("jdbc")
-      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
-      .option("dbtable","up_paymentCode")
-      .option("user","root")
-      .option("password","mysqlroot")
-      .load()
-      .show()
+//    spark.read
+//      .format("jdbc")
+//      .option("url","jdbc:mysql://master:3306/tags_dat?useUnicode=true&characterEncoding=utf8")
+//      .option("dbtable","up_paymentMode")
+//      .option("user","root")
+//      .option("password","mysqlroot")
+//      .load()
+//      .show()
 
 
 
